@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: system-health-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: system-health
+  template:
+    metadata:
+      labels:
+        app: system-health
+    spec:
+      containers:
+      - name: system-health-container
+        image: system-health-api:2.1
+        imagePullPolicy: IfNotPresent
+
+        ports:
+        - containerPort: 5000
+
+        env:
+        - name: CPU_THRESHOLD
+          valueFrom:
+            configMapKeyRef:
+              name: health-thresholds
+              key: CPU_THRESHOLD
+
+        - name: MEMORY_THRESHOLD
+          valueFrom:
+            configMapKeyRef:
+              name: health-thresholds
+              key: MEMORY_THRESHOLD
+
+        - name: DISK_THRESHOLD
+          valueFrom:
+            configMapKeyRef:
+              name: health-thresholds
+              key: DISK_THRESHOLD
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 20
+          periodSeconds: 15
+          timeoutSeconds: 2
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3

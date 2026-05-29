@@ -1,0 +1,62 @@
+# This file tells GitHub: "When code is pushed, do this automatically"
+name: Build and Deploy Kubernetes API
+
+# WHEN should this run?
+on:
+  push:
+    branches: [ main ]  # When code is pushed to main branch
+  workflow_dispatch:     # Or when I click button manually
+
+# WHAT should happen?
+jobs:
+  
+  # JOB 1: BUILD (Create Docker image)
+  build:
+    runs-on: ubuntu-latest  # Run on GitHub's Linux server
+    
+    steps:
+      
+      # Step 1: Get the code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        # Why? Need to get your code from GitHub before building
+      
+      # Step 2: Setup Docker
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+        # Why? Buildx is faster way to build Docker images
+      
+      # Step 3: Login to Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+        # Why? Need permission to push images to Docker Hub
+        # Secrets = safe way to store passwords
+      
+      # Step 4: Build and Push Docker Image
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/system-health-api:latest
+            ${{ secrets.DOCKER_USERNAME }}/system-health-api:${{ github.sha }}
+        # Why? 
+        #   - Build: Create image from Dockerfile
+        #   - Push: Upload to Docker Hub
+        #   - Tags: Two versions = latest + commit ID
+        #     Example: sakshiajadhav/system-health-api:latest
+        #     And:     sakshiajadhav/system-health-api:abc123def456
+      
+      # Step 5: Save deployment file
+      - name: Upload Deployment Manifest
+        uses: actions/upload-artifact@v3
+        with:
+          name: k8s-manifest
+          path: deployment.yaml
+        # Why? Save deployment.yaml for next job to use
+  
+  

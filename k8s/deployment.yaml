@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: system-health-container
-        image: system-health-api:2.1
+        image: sakshiajadhav/system-health-api:latest
         imagePullPolicy: IfNotPresent
 
         ports:

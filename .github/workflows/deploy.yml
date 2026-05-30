@@ -6,10 +6,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  
   build:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -34,16 +32,14 @@ jobs:
       
       - name: Upload Deployment Manifest
         uses: actions/upload-artifact@v4
-      with:
+        with:
           name: k8s-manifest
           path: k8s/deployment.yaml
   
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    
     steps:
-      
       - name: Checkout Code
         uses: actions/checkout@v3
       

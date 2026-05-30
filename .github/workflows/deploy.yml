@@ -49,7 +49,7 @@ jobs:
         #   - Push: Upload to Docker Hub
         #   - Tags: Two versions = latest + commit ID
         #     Example: sakshiajadhav/system-health-api:latest
-        #     And:     sakshiajadhav/system-health-api:abc123def456
+        #     And:  sakshiajadhav/system-health-api:abc123def456
       
       # Step 5: Save deployment file
       - name: Upload Deployment Manifest

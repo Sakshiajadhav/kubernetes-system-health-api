@@ -16,6 +16,8 @@ spec:
       - name: system-health-container
         image: sakshiajadhav/system-health-api:latest
         imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
         resources:
           requests:
             memory: "128Mi"
@@ -24,8 +26,7 @@ spec:
             memory: "512Mi"
             cpu: "500m"
             
-        ports:
-        - containerPort: 5000
+      
 
         env:
         - name: CPU_THRESHOLD

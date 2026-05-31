@@ -1,11 +1,12 @@
 from flask import Flask, jsonify
 import psutil
+import os 
 
 app = Flask(__name__)
 
-CPU_THRESHOLD = 85
-MEM_THRESHOLD = 85
-DISK_THRESHOLD = 90
+CPU_THRESHOLD = float(os.getenv('CPU_THRESHOLD', '85'))
+MEM_THRESHOLD = float(os.getenv('MEMORY_THRESHOLD', '85'))
+DISK_THRESHOLD = float(os.getenv('DISK_THRESHOLD', '90'))
 
 
 def get_system_metrics():

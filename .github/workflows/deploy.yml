@@ -84,7 +84,7 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           kubectl apply -f deployment.yaml
-          kubectl rollout status deployment/system-health-api -n default --timeout=5m
+          kubectl rollout status deployment/system-health-deployment -n default --timeout=5m
         continue-on-error: true
 
       - name: Verify Deployment

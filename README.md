@@ -1,132 +1,211 @@
-# 🚀 Kubernetes System Health API
+# Kubernetes System Health API
 
-A production-grade Python API deployed on Kubernetes that monitors real-time system metrics.  
-This project demonstrates a full DevOps lifecycle: from containerization and production-server migration to Kubernetes orchestration with self-healing capabilities.
+A production-style DevOps project that deploys a Python Flask system health API using Docker, Kubernetes, GitHub Actions, ConfigMaps, health probes, resource limits, shell scripts, and automated tests.
 
-[![Python](https://img.shields.io/badge/python-3.9-blue)](https://www.python.org/)  
-[![Docker](https://img.shields.io/badge/docker-20.10-blue)](https://www.docker.com/)  
-[![Kubernetes](https://img.shields.io/badge/kubernetes-1.27-blue)](https://kubernetes.io/)  
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.10-blue)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-2.3.3-black)](https://flask.palletsprojects.com/)
+[![Docker](https://img.shields.io/badge/Docker-Containerized-blue)](https://www.docker.com/)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-Orchestration-326CE5)](https://kubernetes.io/)
+[![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI%2FCD-2088FF)](https://github.com/features/actions)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
----
-
-## 🌟 Key Features
-
-- Real-time monitoring of CPU, memory, and disk usage using psutil
-- Production ready with Gunicorn WSGI server handling concurrent requests
-- Self-healing with Kubernetes Liveness and Readiness probes
-- Dynamic configuration using ConfigMaps without rebuilding the Docker image
-- Service discovery via Kubernetes NodePort for external access
-
----
-
-## 🏗️ Architecture Flow
-
-```
-   User / Browser
-         |
-         v
- NodePort Service
-         |
-         v
- Pod: Gunicorn + Flask API
-         |
-         v
- System Metrics (psutil) ```
+[![Python](https://img.shields.io/badge/Python-3.10-blue)](https://www.python.org/)
 
 
-- Application: Flask API running on Gunicorn  
-- Container: Dockerized using Python-slim image  
-- Deployment: Manages 2 replicas of the pod  
-- ConfigMap: Injects CPU/RAM thresholds as environment variables  
-- Service: Routes traffic from port 30007 to the pods
 
----
+## Tech Stack
 
-## 🛠️ Tech Stack
+- Python 3.10
+- Flask
+- Gunicorn
+- Docker
+- Kubernetes
+- GitHub Actions
+- Bash
+- pytest
+- psutil
 
-Language: Python 3.9  
-Framework: Flask  
-WSGI Server: Gunicorn  
-Containerization: Docker  
-Orchestration: Kubernetes (kubectl)  
-Library: psutil for system metrics
+## Project Overview
 
----
+This project exposes system health data through REST API endpoints. The application is containerized using Docker and deployed on Kubernetes using a Deployment, Service, and ConfigMap.
 
-## 🚀 Getting Started
+The project demonstrates core DevOps concepts such as:
 
-### 1. Prerequisites
+- Docker image creation
+- Kubernetes application deployment
+- Liveness and readiness probes
+- ConfigMap-based configuration
+- Resource requests and limits
+- Shell scripting for automation
+- GitHub Actions CI/CD pipeline
+- Automated testing with pytest
 
-- Docker installed  
-- Kubernetes cluster (Docker Desktop, Minikube, or Kind)  
-- kubectl CLI
+## Architecture
 
-### 2. Local Setup
-
-
-# Clone the repo
-
-git clone https://github.com/YOUR_USERNAME/kubernetes-system-health-api.git
-cd kubernetes-system-health-api
-
-# Build the Docker image
-
-docker build -t system-health-api:2.0 .
-
-3. Kubernetes Deployment
-
-Apply manifests in order:
-
-
-# 1. Create the ConfigMap
-
-kubectl apply -f configmap.yaml
-
-# 2. Deploy the application
-
-kubectl apply -f deployment.yaml
-
-# 3. Expose via Service
-
-kubectl apply -f service.yaml
-
-4. Verify Deployment
-
-# Check pod status (wait for 1/1 Ready)
-
-kubectl get pods
-
-# Test the endpoint
-
-curl http://localhost:30007/health
-
-📈 Lessons Learned
-
-Initial delay for probes is important to prevent Kubernetes from killing pods before Gunicorn starts
-
-Moving thresholds to ConfigMap allows operational changes without touching app code
-
-Gunicorn is required for production; Flask dev server is not reliable for probes
-
-🛡️ API Reference
-
-Endpoint: GET /health
-
-Response Example:
-
-json
+```text
+User / Browser / curl
+        |
+        v
+NodePort Service
+        |
+        v
+Kubernetes Deployment
+        |
+        v
+Pod: Gunicorn + Flask API
+        |
+        v
+System Metrics using psutil
+API Endpoints
+Endpoint	Purpose
+/health	Returns CPU, memory, disk usage, and health status
+/metrics	Returns system metrics with configured threshold values
+/ready	Readiness endpoint used by Kubernetes
+/live	Liveness endpoint used by Kubernetes
+Example /health response:
 
 {
-  "status": "healthy",
   "cpu": 12.5,
   "memory": 45.2,
-  "disk": 22.1
+  "disk": 22.1,
+  "status": "healthy"
 }
+Project Structure
 
-🔮 Future Enhancements
-Implement Horizontal Pod Autoscaler (HPA) based on CPU usage
+kubernetes-system-health-api/
+  .github/
+    workflows/
+      deploy.yml
+  k8s/
+    configmap.yaml
+    deployment.yaml
+    service.yaml
+  scripts/
+    build-image.sh
+    deploy-k8s.sh
+    check-health.sh
+  app.py
+  Dockerfile
+  README.md
+  requirements.txt
+  requirements-dev.txt
+  test_app.py
+  
+Local Docker Setup
+Build the Docker image:
 
-Add Prometheus exporter for advanced monitoring
+docker build -t system-health-api:latest .
+Run the container:
 
-Integrate Ingress-NGINX for path-based routing
+docker run -p 5000:5000 system-health-api:latest
+Test the API:
+
+curl http://localhost:5000/health
+curl http://localhost:5000/metrics
+curl http://localhost:5000/live
+curl http://localhost:5000/ready
+Kubernetes Deployment
+Apply the Kubernetes manifests:
+
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+Check pod status:
+
+kubectl get pods
+Check service:
+
+kubectl get svc
+Check rollout status:
+
+kubectl rollout status deployment/system-health-deployment
+Test the API through NodePort:
+
+curl http://localhost:30007/health
+curl http://localhost:30007/metrics
+Shell Scripts
+The scripts/ folder contains simple Bash scripts to automate common DevOps tasks.
+
+Build Docker image:
+
+bash scripts/build-image.sh
+Deploy Kubernetes manifests:
+
+bash scripts/deploy-k8s.sh
+Check application health:
+
+bash scripts/check-health.sh
+You can also pass a custom URL to the health check script:
+
+bash scripts/check-health.sh http://localhost:30007/health
+Updating ConfigMap Values
+Threshold values are stored in k8s/configmap.yaml.
+
+After updating ConfigMap values, apply the ConfigMap again:
+
+kubectl apply -f k8s/configmap.yaml
+Because the application reads ConfigMap values as environment variables, restart the Deployment so pods pick up the new values:
+
+kubectl rollout restart deployment/system-health-deployment
+Running Tests
+Install development dependencies:
+
+pip install -r requirements-dev.txt
+Run tests:
+
+pytest test_app.py -v
+The tests validate:
+
+API endpoint availability
+JSON response structure
+health status response
+readiness and liveness endpoints
+threshold values in metrics response
+healthy and unhealthy status behavior using mocked system metrics
+CI/CD Pipeline
+GitHub Actions pipeline includes three stages:
+
+Test
+Runs pytest before building the image.
+
+Build
+Builds the Docker image and pushes it to Docker Hub with two tags:
+
+latest
+Git commit SHA
+Deploy
+Updates the Kubernetes deployment image to the Git commit SHA tag and applies Kubernetes manifests.
+
+Using the Git commit SHA as an image tag makes deployments traceable to the exact code version.
+
+Kubernetes Features Used
+Deployment with 2 replicas
+NodePort Service
+ConfigMap for threshold configuration
+Liveness probe using /live
+Readiness probe using /ready
+Resource requests and limits
+Rolling deployment using Kubernetes Deployment controller
+Docker Improvements
+The Dockerfile uses:
+
+python:3.10-slim base image
+Gunicorn instead of Flask development server
+Runtime-only dependencies from requirements.txt
+Non-root user for safer container execution
+Unbuffered Python logs for better container logging
+Lessons Learned
+Kubernetes probes should use dedicated endpoints for liveness and readiness.
+ConfigMaps help externalize configuration without changing code or rebuilding the Docker image.
+ConfigMap values used as environment variables require pod restart to reflect updates.
+Git commit SHA image tags make deployments easier to trace and debug.
+CI/CD pipelines should fail clearly when tests, builds, or deployments fail.
+Runtime and development dependencies should be separated to keep Docker images cleaner.
+Shell scripts help automate repeated DevOps tasks like image builds, Kubernetes deployment, and health checks.
+Future Improvements
+Add Ingress support
+Add Helm chart
+Add Prometheus metrics endpoint
+Add Grafana dashboard
+Add Terraform-based infrastructure provisioning
+Add security scanning in CI/CD

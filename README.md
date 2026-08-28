@@ -45,24 +45,89 @@ This project exposes system health data through REST API endpoints. The applicat
 
 ## Architecture
 
-```
-User / Browser / curl
-        |
-        v
-NodePort Service
-        |
-        v
-Kubernetes Deployment
-        |
-        v
-Pod: Gunicorn + Flask API
-        |
-        v
-System Metrics via psutil
-```
+```text
+                         KUBERNETES SYSTEM HEALTH API
+                                      |
+                                      v
+                         +-------------------------+
+                         |     User / Browser      |
+                         |          / curl          |
+                         +------------+------------+
+                                      |
+                                      | HTTP :30007
+                                      v
+                         +-------------------------+
+                         |   Kubernetes Service     |
+                         |        NodePort         |
+                         |        :30007            |
+                         +------------+------------+
+                                      |
+                                      v
+                 +-----------------------------------------+
+                 |       Kubernetes Deployment             |
+                 |    system-health-deployment             |
+                 |          Replicas: 2                    |
+                 +-------------------+---------------------+
+                                     |
+                        +------------+------------+
+                        |                         |
+                        v                         v
+                 +-------------+           +-------------+
+                 |    Pod 1    |           |    Pod 2    |
+                 |             |           |             |
+                 |  Gunicorn  |           |  Gunicorn  |
+                 |  + Flask   |           |  + Flask    |
+                 +------+------+           +------+------+
+                        |                         |
+                        +------------+------------+
+                                     |
+                                     v
+                            +-----------------+
+                            |     psutil      |
+                            |                 |
+                            | CPU / Memory    |
+                            |      / Disk     |
+                            +-----------------+
+
+             +-------------------+     +-----------------------+
+             |     ConfigMap     |     |    Health Probes      |
+             | health-thresholds |     |                       |
+             |                   |     | /live  -> Liveness    |
+             | CPU_THRESHOLD     |     | /ready -> Readiness   |
+             | MEMORY_THRESHOLD  |     |                       |
+             | DISK_THRESHOLD    |     +-----------------------+
+             +-------------------+
+
+                         API ENDPOINTS
+              +------------+------------+------------+
+              |            |            |            |
+              v            v            v            v
+           /health      /metrics      /live        /ready
+           Health       Metrics       Liveness     Readiness
+           status       + thresholds  check        check
 
 ---
+## Screenshots
 
+### Test Cases
+
+![Test Cases](screenshots/test-cases.png)
+
+### Pods
+
+![Pods](screenshots/pods.png)
+
+### Service
+
+![Service](screenshots/service.png)
+
+### Live & Ready Endpoints
+
+![Live & Ready Endpoints](screenshots/live%20and%20ready%20endpoints.png)
+
+### Health & Metrics Endpoints
+
+![Health & Metrics Endpoints](screenshots/metrics%20and%20health%20endpoints.png)
 ## API Endpoints
 
 | Endpoint | Purpose |
@@ -87,7 +152,7 @@ System Metrics via psutil
 
 ## Project Structure
 
-```
+```text
 kubernetes-system-health-api/
 ├── .github/
 │   └── workflows/
@@ -100,13 +165,18 @@ kubernetes-system-health-api/
 │   ├── build-image.sh
 │   ├── deploy-k8s.sh
 │   └── check-health.sh
+├── screenshots/
+│   ├── test-cases.png
+│   ├── pods.png
+│   ├── service.png
+│   ├── live and ready endpoints.png
+│   └── metrics and health endpoints.png
 ├── app.py
 ├── Dockerfile
 ├── README.md
 ├── requirements.txt
 ├── requirements-dev.txt
 └── test_app.py
-```
 
 ---
 
